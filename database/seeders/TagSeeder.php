@@ -2,19 +2,19 @@
 
 namespace Database\Seeders;
 
+use App\Models\Tag;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Priority;
 
-class PrioritySeeder extends Seeder
+class TagSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        Priority::create(['name' => 'Low']);
-        Priority::create(['name' => 'Medium']);
-        Priority::create(['name' => 'High']);
+        for ($i = 0; $i < 10; $i++) {
+            Tag::create(['name' => fake()->sentence(1)]);
+        }
     }
 }

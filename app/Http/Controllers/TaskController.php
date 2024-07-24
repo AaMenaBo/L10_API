@@ -9,14 +9,18 @@ use App\Models\User;
 use Gate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate as Authorize;
 
 class TaskController extends Controller
 {
     public function index()
     {
+        if (!Auth::check()) {
+            return redirect('/login');
+        }
 
-        $tasks = Task::all();
+        $tasks = Task::where('user_id', auth()->id())->get();
         return view('tasks.index', [
             'tasks' => $tasks
         ]);
@@ -41,70 +45,40 @@ class TaskController extends Controller
 
     public function store(Request $request)
     {
+        if (!Auth::check()) {
+            return redirect('/login');
+        }
+
+        DB::beginTransaction();
         $data = $request->validate([
             'name' => ['required', 'min:3', 'max:255'],
             'description' => ['required', 'min:3'],
             'priority_id' => 'required|exists:priorities,id',
-            'user_id' => 'required|exists:users,id',
             'tags' => 'exists:tags,id'
         ]);
         $task = new Task();
         $task->name = $data['name'];
         $task->description = $data['description'];
         $task->priority_id = $data['priority_id'];
-        $task->user_id = $data['user_id'];
+        $task->user_id = auth()->id();
         $task->save();
         if (isset($data['tags'])) {
             $task->tags()->sync($data['tags']);
         } else {
             $task->tags()->detach();
         }
-
-        /*
-        Task::create([
-        ...$data,
-        'user_id' => auth()->id(),
-        ]);
-        */
+        DB::commit();
 
         return redirect('/tasks');
     }
 
     public function edit(Task $task)
     {
-
-        /*
-        Gate::define('update-task', function (User $user, Task $task) {
-            return $user->id == $task->user_id;
-        });
-
-        
-        if(!Auth::check()){
-            return redirect('/login');
-        }
-
-        if($task->user->isNot(auth()->user())){
-            abort(403);
-        }
-        */
-
-       // Gate::authorize('update-task', $task);
-       // auth()->user()->can('update-task', $task);
-
-       Authorize::authorize('update', $task);
-       
+        Authorize::authorize('update', $task);
         return view('tasks.edit', [
             'task' => $task,
             'tags' => Tag::all()
         ]);
-
-
-        /*
-        if (auth()->user()->id != $task->user_id) {
-            return redirect('/tasks');
-        }
-        */
-
     }
 
     public function update(Task $task)
