@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             PrioritySeeder::class,
             TagSeeder::class,
+            TaskSeeder::class,
         ]);
     }
 }

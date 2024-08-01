@@ -6,7 +6,6 @@ use App\Models\Priority;
 use App\Models\Tag;
 use App\Models\Task;
 use App\Models\User;
-use Gate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -81,9 +80,9 @@ class TaskController extends Controller
         ]);
     }
 
-    public function update(Task $task)
+    public function update(Request $request, Task $task)
     {
-        $data = request()->validate([
+        $data = $request()->validate([
             'name' => ['required', 'min:3', 'max:255'],
             'description' => ['required', 'min:3'],
             'tags' => ['exists:tags,id']
